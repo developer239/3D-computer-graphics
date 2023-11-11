@@ -3,6 +3,7 @@
 #include <vector>
 #include "Camera.h"
 
+// TODO: Merge camera and projector into single class
 class Projector {
  public:
   float fovFactor = 640;
