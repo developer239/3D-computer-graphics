@@ -12,6 +12,7 @@
 
 class Painter {
  public:
+  // TODO: remove this dependency it is only used in "Mesh"
   Projector projector;
   int windowWidth;
   int windowHeight;
