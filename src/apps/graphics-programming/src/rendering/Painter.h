@@ -23,8 +23,7 @@ class Painter {
       : windowWidth(windowWidth),
         windowHeight(windowHeight),
         colorBuffer(windowWidth * windowHeight),
-        colorBufferTexture(nullptr, SDL_DestroyTexture) {
-  }
+        colorBufferTexture(nullptr, SDL_DestroyTexture) {}
 
   void Pixel(int x, int y, uint32_t color) {
     if (x >= 0 && x < windowWidth && y >= 0 && y < windowHeight) {
@@ -154,7 +153,8 @@ class Painter {
         // Find the vector between a point in the triangle and the camera origin
         Vec<3> camera_ray = projector.camera.position - vector_a;
 
-        float dot_normal_camera = normal.Normalize().DotProduct(camera_ray.Normalize());
+        float dot_normal_camera =
+            normal.Normalize().DotProduct(camera_ray.Normalize());
 
         // Bypass the triangles that are looking away from the camera
         if (dot_normal_camera < 0) {
@@ -183,8 +183,21 @@ class Painter {
         }
       }
 
+      projected_triangle.averageDepth =
+          (transformedVertices[0].z + transformedVertices[1].z +
+           transformedVertices[2].z) /
+          3;
+
       // Save the projected triangle in the array of triangles to render
       trianglesToRender.push_back(projected_triangle);
+
+      std::sort(
+          trianglesToRender.begin(),
+          trianglesToRender.end(),
+          [](const struct Triangle& a, const struct Triangle& b) {
+            return a.averageDepth > b.averageDepth;
+          }
+      );
     }
 
     int num_triangles = trianglesToRender.size();
@@ -202,9 +215,12 @@ class Painter {
           0xFF00FF00
       );
       Triangle(
-          triangle.p1.x, triangle.p1.y, // vertex A
-          triangle.p2.x, triangle.p2.y, // vertex B
-          triangle.p3.x, triangle.p3.y, // vertex C
+          triangle.p1.x,
+          triangle.p1.y,  // vertex A
+          triangle.p2.x,
+          triangle.p2.y,  // vertex B
+          triangle.p3.x,
+          triangle.p3.y,  // vertex C
           0xFF000000
       );
     }
@@ -223,7 +239,13 @@ class Painter {
   void RenderColorBuffer(Core::Renderer& renderer) {
     if (!colorBufferTexture) {
       colorBufferTexture = std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)>(
-          SDL_CreateTexture(renderer.Get().get(), SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, windowWidth, windowHeight),
+          SDL_CreateTexture(
+              renderer.Get().get(),
+              SDL_PIXELFORMAT_ARGB8888,
+              SDL_TEXTUREACCESS_STREAMING,
+              windowWidth,
+              windowHeight
+          ),
           SDL_DestroyTexture
       );
     }
@@ -235,7 +257,12 @@ class Painter {
         windowWidth * sizeof(uint32_t)
     );
 
-    SDL_RenderCopy(renderer.Get().get(), colorBufferTexture.get(), nullptr, nullptr);
+    SDL_RenderCopy(
+        renderer.Get().get(),
+        colorBufferTexture.get(),
+        nullptr,
+        nullptr
+    );
   }
 
   void ClearColorBuffer(uint32_t color = 0xFF000000) {
