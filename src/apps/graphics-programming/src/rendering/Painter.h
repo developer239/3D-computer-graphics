@@ -17,6 +17,7 @@ class Painter {
   int windowWidth;
   int windowHeight;
 
+  // TODO: create separate class for color buffer (colorBuffer, colorBufferTexture, RenderColorBuffer, ClearColorBuffer)
   std::vector<uint32_t> colorBuffer;
   std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)> colorBufferTexture;
 
@@ -192,6 +193,7 @@ class Painter {
       // Save the projected triangle in the array of triangles to render
       trianglesToRender.push_back(projected_triangle);
 
+      // Painter algorithm - sort the triangles by average depth
       std::sort(
           trianglesToRender.begin(),
           trianglesToRender.end(),
