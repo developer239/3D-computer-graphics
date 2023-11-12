@@ -6,6 +6,11 @@ int main() {
   CoreImGui::Strategy gui;
   LoopStrategy strategy;
 
-  auto loop = Core::Loop({&gui, &strategy}, 800, 600, "3D Computer Graphics Programming");
+  auto loop = Core::Loop(
+      {&gui, &strategy},
+      800,
+      600,
+      "3D Computer Graphics Programming"
+  );
   loop.Run();
 }
