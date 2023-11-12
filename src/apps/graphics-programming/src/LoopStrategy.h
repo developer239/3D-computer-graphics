@@ -24,7 +24,7 @@ class LoopStrategy : public Core::IStrategy {
   void Init(Core::Window& window, Core::Renderer& renderer) override {
     mesh = Mesh();
 
-    WavefrontLoader::LoadObjFile("assets/models/cube.obj", mesh);
+    WavefrontLoader::LoadObjFile("assets/models/f22.obj", mesh);
   }
 
   void HandleEvent(SDL_Event& event) override {}
