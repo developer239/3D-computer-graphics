@@ -112,6 +112,11 @@ class Painter {
         mesh.rotation.y,
         mesh.rotation.z
     );
+    auto mat4x4Translation = Matrix4x4::CreateTranslationMatrix(
+        mesh.translation.x,
+        mesh.translation.y,
+        mesh.translation.z
+    );
 
     // Loop all triangle faces of our mesh
     for (const auto& meshFace : mesh.faces) {
@@ -126,11 +131,8 @@ class Painter {
       // Loop all three vertices of this current face and apply transformations
       for (int j = 0; j < 3; j++) {
         Vec<4> vertex4D = Vec<4>(faceVertices[j], 1);
-        Vec<4> transformed_vertex4D = mat4x4Scale * mat4x4Rotation * vertex4D;
+        Vec<4> transformed_vertex4D = mat4x4Scale * mat4x4Rotation * mat4x4Translation * vertex4D;
         Vec<3> transformed_vertex = transformed_vertex4D.ToVec3();
-
-        // Translate the vertices away from the camera
-        transformed_vertex.z += 5;
 
         // Save transformed vertex in the array of transformed vertices
         transformedVertices[j] = transformed_vertex;
