@@ -127,7 +127,5 @@ class Vec<3> {
     return x * other.x + y * other.y + z * other.z;
   }
 
-  float Length() const {
-    return std::sqrt(x * x + y * y + z * z);
-  }
+  float Length() const { return std::sqrt(x * x + y * y + z * z); }
 };

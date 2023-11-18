@@ -19,7 +19,8 @@ class Painter {
       : colorBuffer(windowWidth, windowHeight) {}
 
   void Pixel(int x, int y, uint32_t color) {
-    if (x >= 0 && x < colorBuffer.windowWidth && y >= 0 && y < colorBuffer.windowHeight) {
+    if (x >= 0 && x < colorBuffer.windowWidth && y >= 0 &&
+        y < colorBuffer.windowHeight) {
       colorBuffer[y * colorBuffer.windowWidth + x] = color;
     }
   }
@@ -160,8 +161,7 @@ class Painter {
       // Loop all three vertices to perform projection
       for (int j = 0; j < 3; j++) {
         // Project the current vertex
-        Vec<2> projected_point =
-            camera.Project3DPoint(transformedVertices[j]);
+        Vec<2> projected_point = camera.Project3DPoint(transformedVertices[j]);
 
         // Scale and translate the projected points to the middle of the screen
         projected_point.x += (colorBuffer.windowWidth / 2);

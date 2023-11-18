@@ -5,7 +5,6 @@ set(APP_NAME_TEST ${LIB_NAME}Test)
 
 set(SOURCES
         src/main.cpp
-        src/geometry/Cube.h
         src/geometry/Mesh.h
         src/gui/Controls.h
         src/math/Faces.h
