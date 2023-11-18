@@ -47,7 +47,7 @@ class ColorBuffer {
     );
   }
 
-  void ClearColorBuffer(uint32_t color = 0xFF000000) {
+  void ClearColorBuffer(uint32_t color = Colors::BLACK) {
     std::fill(colorBuffer.begin(), colorBuffer.end(), color);
   }
 

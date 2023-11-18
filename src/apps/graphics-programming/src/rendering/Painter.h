@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include "../Colors.h"
 #include "../geometry/Mesh.h"
 #include "../math/Triangle.h"
 #include "../utils.h"
@@ -25,7 +26,7 @@ class Painter {
     }
   }
 
-  void Line(int x0, int y0, int x1, int y1, uint32_t color = 0xFFFF00FF) {
+  void Line(int x0, int y0, int x1, int y1, uint32_t color = Colors::MAGENTA) {
     int deltaX = x1 - x0;
     int deltaY = y1 - y0;
 
@@ -45,7 +46,7 @@ class Painter {
   }
 
   void Rectangle(
-      int x, int y, int width, int height, uint32_t color = 0xFFFFFF00
+      int x, int y, int width, int height, uint32_t color = Colors::YELLOW
   ) {
     for (int i = 0; i < width; i++) {
       for (int j = 0; j < height; j++) {
@@ -202,7 +203,7 @@ class Painter {
           triangle.p2.y,  // vertex B
           triangle.p3.x,
           triangle.p3.y,  // vertex C
-          0xFF00FF00
+          Colors::GREEN
       );
       Triangle(
           triangle.p1.x,
@@ -211,7 +212,7 @@ class Painter {
           triangle.p2.y,  // vertex B
           triangle.p3.x,
           triangle.p3.y,  // vertex C
-          0xFF000000
+          Colors::BLACK
       );
     }
   }
@@ -220,7 +221,7 @@ class Painter {
     for (int y = 0; y < colorBuffer.windowHeight; y += 10) {
       for (int x = 0; x < colorBuffer.windowWidth; x += 10) {
         if (x % 10 == 0 || y % 10 == 0) {
-          Pixel(x, y, 0xFFFFFFFF);
+          Pixel(x, y, Colors::WHITE);
         }
       }
     }

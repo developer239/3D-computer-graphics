@@ -14,6 +14,7 @@ set(SOURCES
         src/rendering/ColorBuffer.h
         src/rendering/Painter.h
         src/rendering/WavefrontLoader.h
+        src/Colors.h
         src/LoopStrategy.h
         src/utils.h
         )
