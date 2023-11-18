@@ -130,8 +130,10 @@ class Painter {
       // Loop all three vertices of this current face and apply transformations
       for (int j = 0; j < 3; j++) {
         Vec<4> vertex4D = Vec<4>(faceVertices[j], 1);
-        Vec<4> transformed_vertex4D =
-            mat4x4Translation * mat4x4Scale * mat4x4Rotation * vertex4D;
+
+        // order matters
+        auto worldMatrix = mat4x4Translation * mat4x4Rotation * mat4x4Scale;
+        Vec<4> transformed_vertex4D = worldMatrix * vertex4D;
         Vec<3> transformed_vertex = transformed_vertex4D.ToVec3();
 
         // Save transformed vertex in the array of transformed vertices

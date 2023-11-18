@@ -85,6 +85,7 @@ class Vec<3> {
 
   explicit Vec(float x = 0, float y = 0, float z = 0) : x(x), y(y), z(z) {}
 
+  [[deprecated("Use Matrix4x4 and matrix multiplication instead")]]
   Vec<3> RotateX(float angle) const {
     float rad = angle * M_PI / 180;
     float cosa = cos(rad);
@@ -92,6 +93,7 @@ class Vec<3> {
     return Vec<3>(x, y * cosa - z * sina, y * sina + z * cosa);
   }
 
+  [[deprecated("Use Matrix4x4 and matrix multiplication instead")]]
   Vec<3> RotateY(float angle) const {
     float rad = angle * M_PI / 180;
     float cosa = cos(rad);
@@ -99,6 +101,7 @@ class Vec<3> {
     return Vec<3>(x * cosa - z * sina, y, x * sina + z * cosa);
   }
 
+  [[deprecated("Use Matrix4x4 and matrix multiplication instead")]]
   Vec<3> RotateZ(float angle) const {
     float rad = angle * M_PI / 180;
     float cosa = cos(rad);
