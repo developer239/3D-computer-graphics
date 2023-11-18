@@ -42,6 +42,6 @@ class LoopStrategy : public Core::IStrategy {
 
   void OnRender(Core::Window& window, Core::Renderer& renderer) override {
     painter.colorBuffer.RenderColorBuffer(renderer);
-    debug.Render(shouldRotate, shouldCull, camera.fovFactor, mesh);
+    debug.Render(shouldRotate, shouldCull, mesh);
   }
 };

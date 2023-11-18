@@ -12,6 +12,22 @@ class Matrix4x4 {
     return Matrix4x4({{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}});
   }
 
+  static Matrix4x4 CreatePerspectiveMatrix(
+      float flov, float aspect, float znear, float zfar
+  ) {
+    //| 1/aspect*tan(flov/2) 0 0 0 |
+    //| 0 1/tan(flov/2) 0 0 |
+    //| 0 0 zfar/(zfar-znear) znear*zfar/(znear-zfar) |
+    //| 0 0 1 0 |
+    float tanHalfFlov = tan(flov / 2);
+    return Matrix4x4({
+        {1 / (aspect * tanHalfFlov), 0, 0, 0},
+        {0, 1 / tanHalfFlov, 0, 0},
+        {0, 0, zfar / (zfar - znear), znear * zfar / (znear - zfar)},
+        {0, 0, 1, 0},
+    });
+  }
+
   Matrix4x4 static CreateScaleMatrix(float x, float y, float z) {
     //| x 0 0 0 |
     //| 0 y 0 0 |

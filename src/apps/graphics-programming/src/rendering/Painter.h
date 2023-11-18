@@ -170,7 +170,11 @@ class Painter {
       // Loop all three vertices to perform projection
       for (int j = 0; j < 3; j++) {
         // Project the current vertex
-        Vec<2> projected_point = camera.Project3DPoint(transformedVertices[j]);
+        Vec<4> projected_point = camera.Project3DPointMatrix(transformedVertices[j]);
+
+        // Scale into the view
+        projected_point.x *= (colorBuffer.windowWidth / 2);
+        projected_point.y *= (colorBuffer.windowHeight / 2);
 
         // Scale and translate the projected points to the middle of the screen
         projected_point.x += (colorBuffer.windowWidth / 2);

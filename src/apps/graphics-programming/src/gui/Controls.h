@@ -9,13 +9,11 @@
 class Controls {
  public:
   void Render(
-      bool& shouldRotate, bool& shouldCull, float& fovFactor, Mesh& mesh
+      bool& shouldRotate, bool& shouldCull, Mesh& mesh
   ) {
     if (ImGui::Begin("Controls")) {
       ImGui::Checkbox("Should rotate", &shouldRotate);
       ImGui::Checkbox("Should cull", &shouldCull);
-
-      ImGui::SliderFloat("FoV", &fovFactor, 128, 1280);
 
       ImGui::SliderFloat("Rotation X", &mesh.rotation.x, 0, 360);
       ImGui::SliderFloat("Rotation Y", &mesh.rotation.y, 0, 360);
