@@ -107,6 +107,11 @@ class Painter {
     std::vector<struct Triangle> trianglesToRender;
 
     auto mat4x4Scale = Matrix4x4::CreateScaleMatrix(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+    auto mat4x4Rotation = Matrix4x4::CreateRotationMatrix(
+        mesh.rotation.x,
+        mesh.rotation.y,
+        mesh.rotation.z
+    );
 
     // Loop all triangle faces of our mesh
     for (const auto& meshFace : mesh.faces) {
@@ -121,7 +126,7 @@ class Painter {
       // Loop all three vertices of this current face and apply transformations
       for (int j = 0; j < 3; j++) {
         Vec<4> vertex4D = Vec<4>(faceVertices[j], 1);
-        Vec<4> transformed_vertex4D = mat4x4Scale * vertex4D;
+        Vec<4> transformed_vertex4D = mat4x4Scale * mat4x4Rotation * vertex4D;
         Vec<3> transformed_vertex = transformed_vertex4D.ToVec3();
 
         // Translate the vertices away from the camera
@@ -194,7 +199,6 @@ class Painter {
       );
     }
 
-    int num_triangles = trianglesToRender.size();
     for (const auto& triangle : trianglesToRender) {
       // Draw unfilled triangle
       FilledTriangle(
