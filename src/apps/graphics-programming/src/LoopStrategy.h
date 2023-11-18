@@ -13,6 +13,7 @@
 class LoopStrategy : public Core::IStrategy {
  public:
   Controls debug;
+  Camera camera;
 
   Mesh mesh;
   bool shouldRotate = false;
@@ -36,13 +37,13 @@ class LoopStrategy : public Core::IStrategy {
       mesh.rotate();
     }
 
-    painter.ClearColorBuffer();
-    painter.Mesh(mesh, shouldCull);
+    painter.colorBuffer.ClearColorBuffer();
+    painter.Mesh(mesh, shouldCull, camera);
     painter.BackgroundGrid();
   }
 
   void OnRender(Core::Window& window, Core::Renderer& renderer) override {
-    painter.RenderColorBuffer(renderer);
-    debug.Render(shouldRotate, shouldCull, painter.projector.fovFactor, mesh);
+    painter.colorBuffer.RenderColorBuffer(renderer);
+    debug.Render(shouldRotate, shouldCull, camera.fovFactor, mesh);
   }
 };

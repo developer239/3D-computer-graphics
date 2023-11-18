@@ -7,15 +7,17 @@ set(SOURCES
         src/main.cpp
         src/geometry/Cube.h
         src/geometry/Mesh.h
-        src/LoopStrategy.h
+        src/gui/Controls.h
         src/math/Faces.h
         src/math/Triangle.h
         src/math/Vec.h
         src/rendering/Camera.h
+        src/rendering/ColorBuffer.h
         src/rendering/Painter.h
-        src/rendering/Projector.h
         src/rendering/WavefrontLoader.h
-        src/utils.h src/gui/Controls.h)
+        src/LoopStrategy.h
+        src/utils.h
+        )
 
 add_executable(${APP_NAME} ${SOURCES})
 

@@ -8,28 +8,19 @@
 #include "../geometry/Mesh.h"
 #include "../math/Triangle.h"
 #include "../utils.h"
-#include "Projector.h"
+#include "Camera.h"
+#include "ColorBuffer.h"
 
 class Painter {
  public:
-  // TODO: remove this dependency it is only used in "Mesh"
-  Projector projector;
-  int windowWidth;
-  int windowHeight;
-
-  // TODO: create separate class for color buffer (colorBuffer, colorBufferTexture, RenderColorBuffer, ClearColorBuffer)
-  std::vector<uint32_t> colorBuffer;
-  std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)> colorBufferTexture;
+  ColorBuffer colorBuffer;
 
   Painter(int windowWidth, int windowHeight)
-      : windowWidth(windowWidth),
-        windowHeight(windowHeight),
-        colorBuffer(windowWidth * windowHeight),
-        colorBufferTexture(nullptr, SDL_DestroyTexture) {}
+      : colorBuffer(windowWidth, windowHeight) {}
 
   void Pixel(int x, int y, uint32_t color) {
-    if (x >= 0 && x < windowWidth && y >= 0 && y < windowHeight) {
-      colorBuffer[y * windowWidth + x] = color;
+    if (x >= 0 && x < colorBuffer.windowWidth && y >= 0 && y < colorBuffer.windowHeight) {
+      colorBuffer[y * colorBuffer.windowWidth + x] = color;
     }
   }
 
@@ -109,7 +100,7 @@ class Painter {
     }
   }
 
-  void Mesh(Mesh mesh, bool shouldCull) {
+  void Mesh(Mesh mesh, bool shouldCull, Camera camera) {
     std::vector<struct Triangle> trianglesToRender;
 
     // Loop all triangle faces of our mesh
@@ -153,7 +144,7 @@ class Painter {
         Vec<3> normal = vector_ab.CrossProduct(vector_ac);
 
         // Find the vector between a point in the triangle and the camera origin
-        Vec<3> camera_ray = projector.camera.position - vector_a;
+        Vec<3> camera_ray = camera.position - vector_a;
 
         float dot_normal_camera =
             normal.Normalize().DotProduct(camera_ray.Normalize());
@@ -170,11 +161,11 @@ class Painter {
       for (int j = 0; j < 3; j++) {
         // Project the current vertex
         Vec<2> projected_point =
-            projector.Project3DPoint(transformedVertices[j]);
+            camera.Project3DPoint(transformedVertices[j]);
 
         // Scale and translate the projected points to the middle of the screen
-        projected_point.x += (windowWidth / 2);
-        projected_point.y += (windowHeight / 2);
+        projected_point.x += (colorBuffer.windowWidth / 2);
+        projected_point.y += (colorBuffer.windowHeight / 2);
 
         if (j == 0) {
           projected_triangle.p1 = projected_point;
@@ -230,46 +221,13 @@ class Painter {
   }
 
   void BackgroundGrid() {
-    for (int y = 0; y < windowHeight; y += 10) {
-      for (int x = 0; x < windowWidth; x += 10) {
+    for (int y = 0; y < colorBuffer.windowHeight; y += 10) {
+      for (int x = 0; x < colorBuffer.windowWidth; x += 10) {
         if (x % 10 == 0 || y % 10 == 0) {
           Pixel(x, y, 0xFFFFFFFF);
         }
       }
     }
-  }
-
-  void RenderColorBuffer(Core::Renderer& renderer) {
-    if (!colorBufferTexture) {
-      colorBufferTexture = std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)>(
-          SDL_CreateTexture(
-              renderer.Get().get(),
-              SDL_PIXELFORMAT_ARGB8888,
-              SDL_TEXTUREACCESS_STREAMING,
-              windowWidth,
-              windowHeight
-          ),
-          SDL_DestroyTexture
-      );
-    }
-
-    SDL_UpdateTexture(
-        colorBufferTexture.get(),
-        nullptr,
-        colorBuffer.data(),
-        windowWidth * sizeof(uint32_t)
-    );
-
-    SDL_RenderCopy(
-        renderer.Get().get(),
-        colorBufferTexture.get(),
-        nullptr,
-        nullptr
-    );
-  }
-
-  void ClearColorBuffer(uint32_t color = 0xFF000000) {
-    std::fill(colorBuffer.begin(), colorBuffer.end(), color);
   }
 
  private:
