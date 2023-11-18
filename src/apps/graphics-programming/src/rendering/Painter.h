@@ -106,12 +106,11 @@ class Painter {
   void Mesh(Mesh mesh, bool shouldCull, Camera camera) {
     std::vector<struct Triangle> trianglesToRender;
 
-    auto mat4x4Scale = Matrix4x4::CreateScaleMatrix(mesh.scale.x, mesh.scale.y, mesh.scale.z);
-    auto mat4x4Rotation = Matrix4x4::CreateRotationMatrix(
-        mesh.rotation.x,
-        mesh.rotation.y,
-        mesh.rotation.z
-    );
+    auto mat4x4Scale =
+        Matrix4x4::CreateScaleMatrix(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+    auto mat4x4Rotation = Matrix4x4::CreateRotationMatrixX(mesh.rotation.x) *
+                          Matrix4x4::CreateRotationMatrixY(mesh.rotation.y) *
+                          Matrix4x4::CreateRotationMatrixZ(mesh.rotation.z);
     auto mat4x4Translation = Matrix4x4::CreateTranslationMatrix(
         mesh.translation.x,
         mesh.translation.y,
@@ -131,7 +130,8 @@ class Painter {
       // Loop all three vertices of this current face and apply transformations
       for (int j = 0; j < 3; j++) {
         Vec<4> vertex4D = Vec<4>(faceVertices[j], 1);
-        Vec<4> transformed_vertex4D = mat4x4Scale * mat4x4Rotation * mat4x4Translation * vertex4D;
+        Vec<4> transformed_vertex4D =
+            mat4x4Translation * mat4x4Scale * mat4x4Rotation * vertex4D;
         Vec<3> transformed_vertex = transformed_vertex4D.ToVec3();
 
         // Save transformed vertex in the array of transformed vertices

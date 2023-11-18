@@ -28,38 +28,46 @@ class Matrix4x4 {
     return Matrix4x4({{1, 0, 0, x}, {0, 1, 0, y}, {0, 0, 1, z}, {0, 0, 0, 1}});
   }
 
-  Matrix4x4 static CreateRotationMatrix(float x, float y, float z) {
-    // | cosY * cosZ, cosZ * sinX * sinY - cosX * sinZ, cosX * cosZ * sinY +
-    // sinX * sinZ, 0 |
-    // | cosY * sinZ, cosX * cosZ + sinX * sinY * sinZ, cosX *
-    // sinY * sinZ - cosZ * sinX, 0 | | -sinY, cosY * sinX, cosX * cosY, 0 |
-    // | 0, 0, 0, 1 |
-    float radX = x * M_PI / 180;
-    float radY = y * M_PI / 180;
-    float radZ = z * M_PI / 180;
-
-    float cosX = cos(radX);
-    float cosY = cos(radY);
-    float cosZ = cos(radZ);
-    float sinX = sin(radX);
-    float sinY = sin(radY);
-    float sinZ = sin(radZ);
-
+  Matrix4x4 static CreateRotationMatrixZ(float angle) {
+    //| cos -sin 0 0 |
+    //| sin cos  0 0 |
+    //| 0   0    1 0 |
+    //| 0   0    0 1 |
+    float rad = angle * M_PI / 180;
+    float cosa = cos(rad);
+    float sina = sin(rad);
     return Matrix4x4(
-        {{cosY * cosZ,
-          cosZ * sinX * sinY - cosX * sinZ,
-          cosX * cosZ * sinY + sinX * sinZ,
-          0},
-         {cosY * sinZ,
-          cosX * cosZ + sinX * sinY * sinZ,
-          cosX * sinY * sinZ - cosZ * sinX,
-          0},
-         {-sinY, cosY * sinX, cosX * cosY, 0},
-         {0, 0, 0, 1}}
+        {{cosa, -sina, 0, 0}, {sina, cosa, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
     );
   }
 
-  std::array<std::array<float, 4>, 4> data;
+  Matrix4x4 static CreateRotationMatrixX(float angle) {
+    //| 1 0    0   0 |
+    //| 0 cos -sin 0 |
+    //| 0 sin cos  0 |
+    //| 0 0   0    1 |
+    float rad = angle * M_PI / 180;
+    float cosa = cos(rad);
+    float sina = sin(rad);
+    return Matrix4x4(
+        {{1, 0, 0, 0}, {0, cosa, -sina, 0}, {0, sina, cosa, 0}, {0, 0, 0, 1}}
+    );
+  }
+
+  Matrix4x4 static CreateRotationMatrixY(float angle) {
+    //| cos  0 sin 0 |
+    //| 0    1 0   0 |
+    //| -sin 0 cos 0 |
+    //| 0    0 0   1 |
+    float rad = angle * M_PI / 180;
+    float cosa = cos(rad);
+    float sina = sin(rad);
+    return Matrix4x4(
+        {{cosa, 0, sina, 0}, {0, 1, 0, 0}, {-sina, 0, cosa, 0}, {0, 0, 0, 1}}
+    );
+  }
+
+  std::array<std::array<float, 4>, 4> data{};
 
   Matrix4x4(std::initializer_list<std::array<float, 4>> list) {
     int i = 0;
