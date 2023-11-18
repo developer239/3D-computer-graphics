@@ -1,4 +1,3 @@
-// Colors.h
 #pragma once
 
 #include <cstdint>
