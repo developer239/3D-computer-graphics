@@ -14,18 +14,16 @@ class LoopStrategy : public Core::IStrategy {
  public:
   Controls debug;
   Camera camera;
+  // TODO: pass width and height from window instance
+  Painter painter = Painter(800, 600);
 
+  WavefrontLoader wavefrontLoader;
   Mesh mesh;
   bool shouldRotate = false;
   bool shouldCull = false;
 
-  // TODO: pass width and height from window instance
-  Painter painter = Painter(800, 600);
-
   void Init(Core::Window& window, Core::Renderer& renderer) override {
-    mesh = Mesh();
-
-    WavefrontLoader::LoadObjFile("assets/models/f22.obj", mesh);
+    wavefrontLoader.LoadObjFile("assets/models/f22.obj", mesh);
   }
 
   void HandleEvent(SDL_Event& event) override {}
