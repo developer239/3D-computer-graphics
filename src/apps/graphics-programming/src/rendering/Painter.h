@@ -7,6 +7,7 @@
 #include <vector>
 #include "../Colors.h"
 #include "../geometry/Mesh.h"
+#include "../math/Matrix4x4.h"
 #include "../math/Triangle.h"
 #include "../utils.h"
 #include "Camera.h"
@@ -105,6 +106,8 @@ class Painter {
   void Mesh(Mesh mesh, bool shouldCull, Camera camera) {
     std::vector<struct Triangle> trianglesToRender;
 
+    auto mat4x4Scale = Matrix4x4::CreateScaleMatrix(mesh.scale.x, mesh.scale.y, mesh.scale.z);
+
     // Loop all triangle faces of our mesh
     for (const auto& meshFace : mesh.faces) {
       std::vector<Vec<3>> faceVertices(3);
@@ -117,11 +120,9 @@ class Painter {
 
       // Loop all three vertices of this current face and apply transformations
       for (int j = 0; j < 3; j++) {
-        Vec<3> transformed_vertex = faceVertices[j];
-
-        transformed_vertex = transformed_vertex.RotateX(mesh.rotation.x);
-        transformed_vertex = transformed_vertex.RotateY(mesh.rotation.y);
-        transformed_vertex = transformed_vertex.RotateZ(mesh.rotation.z);
+        Vec<4> vertex4D = Vec<4>(faceVertices[j], 1);
+        Vec<4> transformed_vertex4D = mat4x4Scale * vertex4D;
+        Vec<3> transformed_vertex = transformed_vertex4D.ToVec3();
 
         // Translate the vertices away from the camera
         transformed_vertex.z += 5;
