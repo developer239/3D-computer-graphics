@@ -3,21 +3,7 @@ set(APP_FOLDER_NAME graphics-programming)
 
 set(APP_NAME_TEST ${LIB_NAME}Test)
 
-set(SOURCES
-        src/main.cpp
-        src/geometry/Mesh.h
-        src/gui/Controls.h
-        src/math/Faces.h
-        src/math/Triangle.h
-        src/math/Vec.h
-        src/rendering/Camera.h
-        src/rendering/ColorBuffer.h
-        src/rendering/Painter.h
-        src/rendering/WavefrontLoader.h
-        src/Colors.h
-        src/LoopStrategy.h
-        src/utils.h
-        )
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(${APP_NAME} ${SOURCES})
 
