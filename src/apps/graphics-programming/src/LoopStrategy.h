@@ -36,8 +36,8 @@ class LoopStrategy : public Core::IStrategy {
     }
 
     painter.colorBuffer.ClearColorBuffer();
-    painter.Mesh(mesh, shouldCull, camera);
     painter.BackgroundGrid();
+    painter.Mesh(mesh, shouldCull, camera);
   }
 
   void OnRender(Core::Window& window, Core::Renderer& renderer) override {

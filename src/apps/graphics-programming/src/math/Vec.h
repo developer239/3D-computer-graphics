@@ -129,3 +129,21 @@ class Vec<3> {
 
   float Length() const { return std::sqrt(x * x + y * y + z * z); }
 };
+
+template <>
+class Vec<4> {
+ public:
+  union {
+    struct {
+      float x, y, z, w;
+    };
+    std::array<float, 4> elements{};
+  };
+
+  explicit Vec(float x = 0, float y = 0, float z = 0, float w = 1)
+      : x(x), y(y), z(z), w(w) {}
+
+  explicit Vec(Vec<3> v, float w = 1) : x(v.x), y(v.y), z(v.z), w(w) {}
+
+  Vec<3> ToVec3() const { return Vec<3>(x, y, z); }
+};
