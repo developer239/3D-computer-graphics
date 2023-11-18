@@ -105,9 +105,7 @@ class Painter {
     std::vector<struct Triangle> trianglesToRender;
 
     // Loop all triangle faces of our mesh
-    for (int i = 0; i < mesh.faces.size(); i++) {
-      auto meshFace = mesh.faces[i];
-
+    for (const auto& meshFace : mesh.faces) {
       std::vector<Vec<3>> faceVertices(3);
 
       faceVertices[0] = mesh.vertices[meshFace.a - 1];
@@ -188,16 +186,14 @@ class Painter {
       std::sort(
           trianglesToRender.begin(),
           trianglesToRender.end(),
-          [](const struct Triangle& a, const struct Triangle& b) {
+          [](const auto& a, const auto& b) {
             return a.averageDepth > b.averageDepth;
           }
       );
     }
 
     int num_triangles = trianglesToRender.size();
-    for (int i = 0; i < num_triangles; i++) {
-      struct Triangle triangle = trianglesToRender[i];
-
+    for (const auto& triangle : trianglesToRender) {
       // Draw unfilled triangle
       FilledTriangle(
           triangle.p1.x,
