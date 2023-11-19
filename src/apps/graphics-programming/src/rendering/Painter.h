@@ -178,6 +178,9 @@ class Painter {
         projected_point.x *= (colorBuffer.windowWidth / 2);
         projected_point.y *= (colorBuffer.windowHeight / 2);
 
+        // invert Y axis to account for flipped screen coordinates
+        projected_point.y *= -1;
+
         // Scale and translate the projected points to the middle of the screen
         projected_point.x += (colorBuffer.windowWidth / 2);
         projected_point.y += (colorBuffer.windowHeight / 2);
