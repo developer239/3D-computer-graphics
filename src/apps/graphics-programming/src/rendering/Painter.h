@@ -12,6 +12,7 @@
 #include "../utils.h"
 #include "Camera.h"
 #include "ColorBuffer.h"
+#include "Light.h"
 
 class Painter {
  public:
@@ -103,7 +104,7 @@ class Painter {
     }
   }
 
-  void Mesh(Mesh mesh, bool shouldCull, Camera camera) {
+  void Mesh(Mesh mesh, bool shouldCull, Camera camera, Light light) {
     std::vector<struct Triangle> trianglesToRender;
 
     auto mat4x4Scale =
@@ -140,19 +141,19 @@ class Painter {
         transformedVertices[j] = transformed_vertex;
       }
 
+      Vec<3> vector_a = transformedVertices[0]; /*   A   */
+      Vec<3> vector_b = transformedVertices[1]; /*  / \  */
+      Vec<3> vector_c = transformedVertices[2]; /* C---B */
+
+      // Get the vector subtraction of B-A and C-A
+      Vec<3> vector_ab = vector_b - vector_a;
+      Vec<3> vector_ac = vector_c - vector_a;
+
+      // Compute the face normal (using cross product to find perpendicular)
+      Vec<3> normal = vector_ab.CrossProduct(vector_ac);
+
       if (shouldCull) {
-        // Check backface culling
-        Vec<3> vector_a = transformedVertices[0]; /*   A   */
-        Vec<3> vector_b = transformedVertices[1]; /*  / \  */
-        Vec<3> vector_c = transformedVertices[2]; /* C---B */
-
-        // Get the vector subtraction of B-A and C-A
-        Vec<3> vector_ab = vector_b - vector_a;
-        Vec<3> vector_ac = vector_c - vector_a;
-
-        // Compute the face normal (using cross product to find perpendicular)
-        Vec<3> normal = vector_ab.CrossProduct(vector_ac);
-
+        auto vector_a = transformedVertices[0];
         // Find the vector between a point in the triangle and the camera origin
         Vec<3> camera_ray = camera.position - vector_a;
 
@@ -170,7 +171,8 @@ class Painter {
       // Loop all three vertices to perform projection
       for (int j = 0; j < 3; j++) {
         // Project the current vertex
-        Vec<4> projected_point = camera.Project3DPointMatrix(transformedVertices[j]);
+        Vec<4> projected_point =
+            camera.Project3DPointMatrix(transformedVertices[j]);
 
         // Scale into the view
         projected_point.x *= (colorBuffer.windowWidth / 2);
@@ -194,6 +196,9 @@ class Painter {
            transformedVertices[2].z) /
           3;
 
+      projected_triangle.lightIntensityFactor =
+          -normal.Normalize().DotProduct(light.direction);
+
       // Save the projected triangle in the array of triangles to render
       trianglesToRender.push_back(projected_triangle);
 
@@ -216,7 +221,7 @@ class Painter {
           triangle.p2.y,  // vertex B
           triangle.p3.x,
           triangle.p3.y,  // vertex C
-          Colors::GREEN
+          Colors::Darken(Colors::GREEN, triangle.lightIntensityFactor)
       );
       Triangle(
           triangle.p1.x,
@@ -225,7 +230,7 @@ class Painter {
           triangle.p2.y,  // vertex B
           triangle.p3.x,
           triangle.p3.y,  // vertex C
-          Colors::BLACK
+          Colors::Darken(Colors::GREEN, triangle.lightIntensityFactor)
       );
     }
   }

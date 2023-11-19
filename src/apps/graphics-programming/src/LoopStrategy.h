@@ -12,13 +12,13 @@
 
 class LoopStrategy : public Core::IStrategy {
  public:
-  Controls debug;
+  Light light;
   Camera camera;
-  // TODO: pass width and height from window instance
   Painter painter = Painter(800, 600);
-
   WavefrontLoader wavefrontLoader;
   Mesh mesh;
+  Controls debug;
+
   bool shouldRotate = false;
   bool shouldCull = false;
 
@@ -37,7 +37,7 @@ class LoopStrategy : public Core::IStrategy {
 
     painter.colorBuffer.ClearColorBuffer();
     painter.BackgroundGrid();
-    painter.Mesh(mesh, shouldCull, camera);
+    painter.Mesh(mesh, shouldCull, camera, light);
   }
 
   void OnRender(Core::Window& window, Core::Renderer& renderer) override {

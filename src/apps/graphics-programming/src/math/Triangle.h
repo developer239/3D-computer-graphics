@@ -9,6 +9,7 @@ struct Triangle {
   Vec<4> p2;
   Vec<4> p3;
   double averageDepth;
+  double lightIntensityFactor;
 
   explicit Triangle(
       Vec<4> p1 = Vec<4>(), Vec<4> p2 = Vec<4>(), Vec<4> p3 = Vec<4>(),
