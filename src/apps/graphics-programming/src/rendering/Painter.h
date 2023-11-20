@@ -28,6 +28,28 @@ class Painter {
     }
   }
 
+  // Draw textured pixel at position x and y using interpolation
+  void Texel(
+      int x, int y, Vec<2> pointA, Vec<2> pointB, Vec<2> pointC,
+      UVCoordinates uv0, UVCoordinates uv1, UVCoordinates uv2,
+      const uint32_t* texture, int textureWidth = 64, int textureHeight = 64
+  ) {
+    auto pointP = Vec<2>{(float)x, (float)y};
+    auto weights = BarycentricWeights(pointA, pointB, pointC, pointP);
+
+    float alpha = weights.x;
+    float beta = weights.y;
+    float gamma = weights.z;
+
+    auto interpolatedU = uv0.u * alpha + uv1.u * beta + uv2.u * gamma;
+    auto interpolatedV = uv0.v * alpha + uv1.v * beta + uv2.v * gamma;
+
+    int textureX = abs((int)(interpolatedU * textureWidth));
+    int textureY = abs((int)(interpolatedV * textureHeight));
+
+    Pixel(x, y, texture[textureY * textureWidth + textureX]);
+  }
+
   void Line(int x0, int y0, int x1, int y1, uint32_t color = Colors::MAGENTA) {
     int deltaX = x1 - x0;
     int deltaY = y1 - y0;
@@ -104,7 +126,117 @@ class Painter {
     }
   }
 
-  void Mesh(Mesh mesh, bool shouldCull, Camera camera, Light light) {
+  // Draw a textured triangle with the flat-top/flat-bottom method. We split the
+  // original triangle in two, half flat-bottom and half-flat top
+  //
+  //            v0 (x0, y0)
+  //                                   / \
+  //           /   \
+  //          /     \
+  //         /       \
+  //        /         \
+  //v1 (x1, y1) ----v3 (x2, y2)
+  //       \_           \
+  //          \_         \
+  //             \_       \
+  //                \_     \
+  //                   \    \
+  //                     \_  \
+  //                        \_\
+  //                           \
+  //                           v2
+  //
+  void TexturedTriangle(
+      int x0, int y0, int x1, int y1, int x2, int y2, float u0, float v0,
+      float u1, float v1, float u2, float v2, const uint32_t* texture
+  ) {
+    // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
+    if (y0 > y1) {
+      intSwap(&y0, &y1);
+      intSwap(&x0, &x1);
+      floatSwap(&u0, &u1);
+      floatSwap(&v0, &v1);
+    }
+    if (y1 > y2) {
+      intSwap(&y1, &y2);
+      intSwap(&x1, &x2);
+      floatSwap(&u1, &u2);
+      floatSwap(&v1, &v2);
+    }
+    if (y0 > y1) {
+      intSwap(&y0, &y1);
+      intSwap(&x0, &x1);
+      floatSwap(&u0, &u1);
+      floatSwap(&v0, &v1);
+    }
+
+    Vec<2> pointA = {(float)x0, (float)y0};
+    Vec<2> pointB = {(float)x1, (float)y1};
+    Vec<2> pointC = {(float)x2, (float)y2};
+
+    UVCoordinates uvA = {u0, v0};
+    UVCoordinates uvB = {u1, v1};
+    UVCoordinates uvC = {u2, v2};
+
+    //
+    // Render the upper part of the triangle (flat-bottom)
+    float invSlope1 = 0;
+    float invSlope2 = 0;
+
+    if (y1 - y0 > 0) {
+      invSlope1 = float(x1 - x0) / (float)(y1 - y0);
+    }
+    if (y2 - y0 > 0) {
+      invSlope2 = float(x2 - x0) / (float)(y2 - y0);
+    }
+
+    if (y1 - y0 != 0) {
+      for (int y = y0; y <= y1; y++) {
+        int xStart = x1 + (y - y1) * invSlope1;
+        int xEnd = x0 + (y - y0) * invSlope2;
+
+        if (xEnd < xStart) {
+          intSwap(&xStart, &xEnd);
+        }
+
+        for (int x = xStart; x < xEnd; x++) {
+          Texel(x, y, pointA, pointB, pointC, uvA, uvB, uvC, texture);
+        }
+      }
+    }
+
+    //
+    // Render the bottom part of the triangle (flat-top)
+    invSlope1 = 0;
+    invSlope2 = 0;
+
+    if (y2 - y1 > 0) {
+      invSlope1 = float(x2 - x1) / (float)(y2 - y1);
+    }
+    if (y2 - y0 > 0) {
+      invSlope2 = float(x2 - x0) / (float)(y2 - y0);
+    }
+
+    if (y2 - y1 != 0) {
+      for (int y = y1; y <= y2; y++) {
+        int xStart = x1 + (y - y1) * invSlope1;
+        int xEnd = x0 + (y - y0) * invSlope2;
+
+        if (xEnd < xStart) {
+          intSwap(&xStart, &xEnd);
+        }
+
+        for (int x = xStart; x < xEnd; x++) {
+          Texel(x, y, pointA, pointB, pointC, uvA, uvB, uvC, texture);
+        }
+      }
+    }
+  }
+
+  void Mesh(
+      Mesh mesh, bool shouldCull, Camera camera, Light light,
+      const uint32_t* texture
+  ) {
     std::vector<struct Triangle> trianglesToRender;
 
     auto mat4x4Scale =
@@ -202,6 +334,10 @@ class Painter {
       projected_triangle.lightIntensityFactor =
           -normal.Normalize().DotProduct(light.direction);
 
+      projected_triangle.p1_uv = {meshFace.a_uv.u, meshFace.a_uv.v};
+      projected_triangle.p2_uv = {meshFace.b_uv.u, meshFace.b_uv.v};
+      projected_triangle.p3_uv = {meshFace.c_uv.u, meshFace.c_uv.v};
+
       // Save the projected triangle in the array of triangles to render
       trianglesToRender.push_back(projected_triangle);
 
@@ -217,24 +353,41 @@ class Painter {
 
     for (const auto& triangle : trianglesToRender) {
       // Draw unfilled triangle
-      FilledTriangle(
+      //            FilledTriangle(
+      //                triangle.p1.x,
+      //                triangle.p1.y,  // vertex A
+      //                triangle.p2.x,
+      //                triangle.p2.y,  // vertex B
+      //                triangle.p3.x,
+      //                triangle.p3.y,  // vertex C
+      //                Colors::Darken(Colors::GREEN,
+      //                triangle.lightIntensityFactor)
+      //            );
+      TexturedTriangle(
           triangle.p1.x,
           triangle.p1.y,  // vertex A
           triangle.p2.x,
           triangle.p2.y,  // vertex B
           triangle.p3.x,
           triangle.p3.y,  // vertex C
-          Colors::Darken(Colors::GREEN, triangle.lightIntensityFactor)
+          triangle.p1_uv.u,
+          triangle.p1_uv.v,
+          triangle.p2_uv.u,
+          triangle.p2_uv.v,
+          triangle.p3_uv.u,
+          triangle.p3_uv.v,
+          texture
       );
-      Triangle(
-          triangle.p1.x,
-          triangle.p1.y,  // vertex A
-          triangle.p2.x,
-          triangle.p2.y,  // vertex B
-          triangle.p3.x,
-          triangle.p3.y,  // vertex C
-          Colors::Darken(Colors::GREEN, triangle.lightIntensityFactor)
-      );
+      //            Triangle(
+      //                triangle.p1.x,
+      //                triangle.p1.y,  // vertex A
+      //                triangle.p2.x,
+      //                triangle.p2.y,  // vertex B
+      //                triangle.p3.x,
+      //                triangle.p3.y,  // vertex C
+      //                Colors::Darken(Colors::GREEN,
+      //                triangle.lightIntensityFactor)
+      //            );
     }
   }
 
@@ -249,6 +402,32 @@ class Painter {
   }
 
  private:
+  Vec<3> BarycentricWeights(Vec<2> a, Vec<2> b, Vec<2> c, Vec<2> p) {
+    // Find the vectors between the vertices ABC and point p
+    Vec<2> ac = c - a;
+    Vec<2> ab = b - a;
+    Vec<2> pc = c - p;
+    Vec<2> pb = b - p;
+    Vec<2> ap = p - a;
+
+    // Area of the full parallelogram (triangle ABC) using cross product
+    float area_abc = ac.x * ab.y - ac.y * ab.x;  // |AC x AB|
+
+    // Alpha = area of parallelogram- PBC over the area of the full
+    // parallelogram-ABC
+    float alpha = (pc.x * pb.y - pc.y * pb.x) / area_abc;
+
+    // Beta = area of parallelogram-APC over the area of the full
+    // parallelogram-ABC
+    float beta = (ac.x * ap.y - ac.y * ap.x) / area_abc;
+
+    // Gama can be easily found since the barycentric coordinates always add up
+    // to 1.0
+    float gamma = 1.0f - alpha - beta;
+
+    return Vec<3>{alpha, beta, gamma};
+  }
+
   void fillFlatBottomTriangle(
       int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color
   ) {

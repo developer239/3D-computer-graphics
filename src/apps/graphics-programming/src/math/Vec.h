@@ -4,6 +4,9 @@
 #include <cmath>
 #include <initializer_list>
 
+// TODO: refactor using Curiously Recurring Template Pattern (CRTP) and inheritance to avoid code duplication
+// Ideally write tests before the refactor
+
 template <size_t N>
 class Vec {
  public:
@@ -70,7 +73,19 @@ class Vec<2> {
     std::array<float, 2> elements{};
   };
 
-  explicit Vec(float x = 0, float y = 0) : x(x), y(y) {}
+  Vec(float x = 0, float y = 0) : x(x), y(y) {}
+
+  Vec<2> operator-(const Vec<2>& other) const {
+    Vec<2> result;
+    for (size_t i = 0; i < 2; ++i) {
+      result.elements[i] = elements[i] - other.elements[i];
+    }
+    return result;
+  }
+
+  float DotProduct(const Vec<2>& other) const {
+    return x * other.x + y * other.y;
+  }
 };
 
 template <>

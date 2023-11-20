@@ -9,6 +9,7 @@
 #include "logger/Logger.h"
 #include "rendering/Painter.h"
 #include "rendering/WavefrontLoader.h"
+#include "Textures.h"
 
 class LoopStrategy : public Core::IStrategy {
  public:
@@ -17,13 +18,16 @@ class LoopStrategy : public Core::IStrategy {
   Painter painter = Painter(800, 600);
   WavefrontLoader wavefrontLoader;
   Mesh mesh;
+  // TODO: use smart pointer
+  const uint32_t* redbrickTexture = (uint32_t*)REDBRICK_TEXTURE;
   Controls debug;
 
   bool shouldRotate = false;
   bool shouldCull = false;
 
   void Init(Core::Window& window, Core::Renderer& renderer) override {
-    wavefrontLoader.LoadObjFile("assets/models/f22.obj", mesh);
+    // wavefrontLoader.LoadObjFile("assets/models/f22.obj", mesh);
+    mesh = Mesh::CreateCube();
   }
 
   void HandleEvent(SDL_Event& event) override {}
@@ -37,7 +41,7 @@ class LoopStrategy : public Core::IStrategy {
 
     painter.colorBuffer.ClearColorBuffer();
     painter.BackgroundGrid();
-    painter.Mesh(mesh, shouldCull, camera, light);
+    painter.Mesh(mesh, shouldCull, camera, light, redbrickTexture);
   }
 
   void OnRender(Core::Window& window, Core::Renderer& renderer) override {
