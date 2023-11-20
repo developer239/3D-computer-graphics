@@ -32,7 +32,7 @@ class Painter {
   void Texel(
       int x, int y, Vec<2> pointA, Vec<2> pointB, Vec<2> pointC,
       UVCoordinates uv0, UVCoordinates uv1, UVCoordinates uv2,
-      const uint32_t* texture, int textureWidth = 64, int textureHeight = 64
+      const std::unique_ptr<uint32_t[]>& texture, int textureWidth = 64, int textureHeight = 64
   ) {
     auto pointP = Vec<2>{(float)x, (float)y};
     auto weights = BarycentricWeights(pointA, pointB, pointC, pointP);
@@ -148,7 +148,7 @@ class Painter {
   //
   void TexturedTriangle(
       int x0, int y0, int x1, int y1, int x2, int y2, float u0, float v0,
-      float u1, float v1, float u2, float v2, const uint32_t* texture
+      float u1, float v1, float u2, float v2, const std::unique_ptr<uint32_t[]>& texture
   ) {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
     if (y0 > y1) {
@@ -235,7 +235,7 @@ class Painter {
 
   void Mesh(
       Mesh mesh, bool shouldCull, Camera camera, Light light,
-      const uint32_t* texture
+      const std::unique_ptr<uint32_t[]>& texture
   ) {
     std::vector<struct Triangle> trianglesToRender;
 
