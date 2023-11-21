@@ -1,8 +1,8 @@
 #pragma once
 
 #include <SDL.h>
-
-#include "vector"
+#include <cstring>
+#include <memory>
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +16,7 @@ class Texture {
  public:
   int width;
   int height;
-  uint32_t* data;
+  std::unique_ptr<uint32_t[]> data;
 
   Texture() : width(0), height(0), data(nullptr) {}
 
@@ -33,12 +33,61 @@ class Texture {
       return;
     }
 
-    width = 64;
-    height = 64;
+    width = upng_get_width(texture);
+    height = upng_get_height(texture);
 
     size_t bufferSize = upng_get_size(texture);
-    data = new uint32_t[bufferSize / sizeof(uint32_t)];
-    std::memcpy(data, upng_get_buffer(texture), bufferSize);
+    data = std::make_unique<uint32_t[]>(bufferSize / sizeof(uint32_t));
+    std::memcpy(data.get(), upng_get_buffer(texture), bufferSize);
+
     upng_free(texture);
   }
+
+  // Copy constructor
+  Texture(const Texture& other)
+      : width(other.width),
+        height(other.height),
+        data(new uint32_t[other.width * other.height]) {
+    std::memcpy(
+        data.get(),
+        other.data.get(),
+        width * height * sizeof(uint32_t)
+    );
+  }
+
+  // Move constructor
+  Texture(Texture&& other) noexcept
+      : width(other.width), height(other.height), data(std::move(other.data)) {
+    other.width = 0;
+    other.height = 0;
+  }
+
+  // Copy assignment operator
+  Texture& operator=(const Texture& other) {
+    if (this != &other) {
+      width = other.width;
+      height = other.height;
+      data = std::make_unique<uint32_t[]>(width * height);
+      std::memcpy(
+          data.get(),
+          other.data.get(),
+          width * height * sizeof(uint32_t)
+      );
+    }
+    return *this;
+  }
+
+  // Move assignment operator
+  Texture& operator=(Texture&& other) noexcept {
+    if (this != &other) {
+      width = other.width;
+      height = other.height;
+      data = std::move(other.data);
+      other.width = 0;
+      other.height = 0;
+    }
+    return *this;
+  }
+
+  // Destructor is not needed as unique_ptr will handle memory deallocation
 };
