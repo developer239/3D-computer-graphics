@@ -1,4 +1,4 @@
-add_subdirectory(apps/graphics-programming)
+add_subdirectory(apps/3d-graphics-programming)
 
 add_subdirectory(packages/core)
 add_subdirectory(packages/core-imgui)

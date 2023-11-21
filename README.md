@@ -6,7 +6,7 @@ Monorepository for graphics programming and game engine related projects.
 
 ## 3D Computer Graphics Programming
 
-- [Link To App](/src/apps/graphics-programming)
+- [Link To App](/src/apps/3d-graphics-programming)
 - [Link To Original](https://pikuma.com/courses/learn-3d-computer-graphics-programming)
 
 Personal take on the course. The original course is in C. I'm using C++ with custom CMake configuration and somewhat clean code architecture.

@@ -1,5 +1,5 @@
 set(APP_NAME GraphicsProgramming)
-set(APP_FOLDER_NAME graphics-programming)
+set(APP_FOLDER_NAME 3d-graphics-programming)
 
 set(APP_NAME_TEST ${LIB_NAME}Test)
 
