@@ -10,7 +10,7 @@ class Mesh {
   std::vector<Face> faces = {};
   Vec<3> rotation = Vec<3>{0, 0, 0};
   Vec<3> scale = Vec<3>{1, 1, 1};
-  Vec<3> translation = Vec<3>{0, 0, 5};
+  Vec<3> translation = Vec<3>{0, 0, 4};
   // TODO: remove data? what is it for?
   std::vector<std::vector<Vec<3>>> data;
 
@@ -132,8 +132,8 @@ class Mesh {
   }
 
   void rotate() {
-    rotation.x += 0.1;
-    rotation.y += 0.1;
-    rotation.z += 0.1;
+    rotation.x += 0.2;
+    rotation.y += 0.2;
+    rotation.z += 0.2;
   }
 };
