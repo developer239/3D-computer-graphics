@@ -286,9 +286,9 @@ class Painter {
     for (const auto& meshFace : mesh.faces) {
       std::vector<Vec<3>> faceVertices(3);
 
-      faceVertices[0] = mesh.vertices[meshFace.a - 1];
-      faceVertices[1] = mesh.vertices[meshFace.b - 1];
-      faceVertices[2] = mesh.vertices[meshFace.c - 1];
+      faceVertices[0] = mesh.vertices[meshFace.a];
+      faceVertices[1] = mesh.vertices[meshFace.b];
+      faceVertices[2] = mesh.vertices[meshFace.c];
 
       std::vector<Vec<3>> transformedVertices(3);
 

@@ -15,12 +15,19 @@ class WavefrontLoader {
       return false;
     }
 
+    std::vector<UVCoordinates> UVs = {};
     std::string line;
     while (std::getline(file, line)) {
       if (line.rfind("v ", 0) == 0) {
         ProcessVertexLine(line, mesh);
-      } else if (line.rfind("f ", 0) == 0) {
-        ProcessFaceLine(line, mesh);
+      }
+
+      if (line.rfind("f ", 0) == 0) {
+        ProcessFaceLine(line, mesh, UVs);
+      }
+
+      if (line.rfind("vt ", 0) == 0) {
+        ProcessTextureLine(line, mesh, UVs);
       }
     }
 
@@ -28,6 +35,17 @@ class WavefrontLoader {
   }
 
  private:
+  void ProcessTextureLine(
+      const std::string& line, Mesh& mesh, std::vector<UVCoordinates>& UVs
+  ) {
+    UVCoordinates UVcoords;
+
+    std::istringstream iss(line);
+    sscanf(line.c_str(), "vt %f %f", &UVcoords.u, &UVcoords.v);
+
+    UVs.push_back(UVcoords);
+  }
+
   void ProcessVertexLine(const std::string& line, Mesh& mesh) {
     std::istringstream iss(line);
     std::string prefix;
@@ -36,7 +54,9 @@ class WavefrontLoader {
     mesh.vertices.push_back(vertex);
   }
 
-  void ProcessFaceLine(const std::string& line, Mesh& mesh) {
+  void ProcessFaceLine(
+      const std::string& line, Mesh& mesh, std::vector<UVCoordinates>& UVs
+  ) {
     int vertexIndices[3];
     int textureIndices[3];
     int normalIndices[3];
@@ -55,7 +75,14 @@ class WavefrontLoader {
         &normalIndices[2]
     );
 
-    Face face(vertexIndices[0], vertexIndices[1], vertexIndices[2]);
+    Face face(
+        vertexIndices[0] - 1,
+        vertexIndices[1] - 1,
+        vertexIndices[2] - 1,
+        UVs[textureIndices[0] - 1],
+        UVs[textureIndices[1] - 1],
+        UVs[textureIndices[2] - 1]
+    );
     mesh.faces.push_back(face);
   }
 };
