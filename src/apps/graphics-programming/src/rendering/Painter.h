@@ -201,6 +201,11 @@ class Painter {
       std::swap(v0, v1);
     }
 
+    // Flip the V component to account for inverted UV-coordinates (V grows downwards)
+    v0 = 1 - v0;
+    v1 = 1 - v1;
+    v2 = 1 - v2;
+
     auto pointA = Vec<4>{(float)x0, (float)y0, z0, w0};
     auto pointB = Vec<4>{(float)x1, (float)y1, z1, w1};
     auto pointC = Vec<4>{(float)x2, (float)y2, z2, w2};
