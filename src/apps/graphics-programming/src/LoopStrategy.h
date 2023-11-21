@@ -22,7 +22,9 @@ class LoopStrategy : public Core::IStrategy {
   Controls debug;
 
   bool shouldRotate = false;
-  bool shouldCull = false;
+  bool shouldCull = true;
+  bool shouldRenderTexture = true;
+  bool shouldRenderWireframe = false;
 
   void Init(Core::Window& window, Core::Renderer& renderer) override {
     // wavefrontLoader.LoadObjFile("assets/models/f22.obj", mesh);
@@ -59,11 +61,11 @@ class LoopStrategy : public Core::IStrategy {
 
     painter.colorBuffer.ClearColorBuffer();
     painter.BackgroundGrid();
-    painter.Mesh(mesh, shouldCull, camera, light, redbrickTexture);
+    painter.Mesh(mesh, shouldCull, shouldRenderTexture, shouldRenderWireframe, camera, light, redbrickTexture);
   }
 
   void OnRender(Core::Window& window, Core::Renderer& renderer) override {
     painter.colorBuffer.RenderColorBuffer(renderer);
-    debug.Render(shouldRotate, shouldCull, mesh);
+    debug.Render(shouldRotate, shouldCull, mesh, shouldRenderTexture, shouldRenderWireframe);
   }
 };

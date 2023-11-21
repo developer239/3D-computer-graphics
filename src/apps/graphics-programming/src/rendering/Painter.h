@@ -29,10 +29,11 @@ class Painter {
 
   // Draw textured pixel at position x and y using interpolation
   void Texel(
-      int x, int y, Vec<4> pointA, Vec<4> pointB, Vec<4> pointC,
-      UVCoordinates auv, UVCoordinates buv, UVCoordinates cuv,
-      const std::unique_ptr<uint32_t[]>& texture, int textureWidth = 64,
-      int textureHeight = 64
+      int x, int y,                                             //
+      Vec<4> pointA, Vec<4> pointB, Vec<4> pointC,              //
+      UVCoordinates auv, UVCoordinates buv, UVCoordinates cuv,  //
+      const std::unique_ptr<uint32_t[]>& texture,               //
+      int textureWidth = 64, int textureHeight = 64
   ) {
     auto pointP = Vec<2>{(float)x, (float)y};
     Vec<2> a = pointA.ToVec2();
@@ -53,7 +54,6 @@ class Painter {
 
     // Perform perspective correct interpolation of U/w, V/w values using the
     // barycentric weights and factor of 1/w
-
 
     interpolatedU = (auv.u / pointA.w) * alpha + (buv.u / pointB.w) * beta +
                     (cuv.u / pointC.w) * gamma;
@@ -152,7 +152,7 @@ class Painter {
   // original triangle in two, half flat-bottom and half-flat top
   //
   //            v0 (x0, y0)
-  //                                           / \
+  //                                                   / \
   //           /   \
   //          /     \
   //         /       \
@@ -169,9 +169,9 @@ class Painter {
   //                           v2
   //
   void TexturedTriangle(
-      int x0, int y0, float z0, float w0, float u0, float v0,
-      int x1, int y1, float z1, float w1, float u1, float v1,
-      int x2, int y2, float z2, float w2, float u2, float v2,
+      int x0, int y0, float z0, float w0, float u0, float v0,  //
+      int x1, int y1, float z1, float w1, float u1, float v1,  //
+      int x2, int y2, float z2, float w2, float u2, float v2,  //
       const std::unique_ptr<uint32_t[]>& texture
   ) {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
@@ -264,7 +264,8 @@ class Painter {
   }
 
   void Mesh(
-      Mesh mesh, bool shouldCull, Camera camera, Light light,
+      Mesh mesh, bool shouldCull, bool shouldRenderTexture,
+      bool shouldRenderWireframe, Camera camera, Light light,
       const std::unique_ptr<uint32_t[]>& texture
   ) {
     std::vector<struct Triangle> trianglesToRender;
@@ -383,48 +384,50 @@ class Painter {
     }
 
     for (const auto& triangle : trianglesToRender) {
-      // Draw unfilled triangle
-      //            FilledTriangle(
-      //                triangle.p1.x,
-      //                triangle.p1.y,  // vertex A
-      //                triangle.p2.x,
-      //                triangle.p2.y,  // vertex B
-      //                triangle.p3.x,
-      //                triangle.p3.y,  // vertex C
-      //                Colors::Darken(Colors::GREEN,
-      //                triangle.lightIntensityFactor)
-      //            );
-      TexturedTriangle(
-          triangle.p1.x,
-          triangle.p1.y,
-          triangle.p1.z,
-          triangle.p1.w,
-          triangle.p1UV.u,
-          triangle.p1UV.v,  // vertex A
-          triangle.p2.x,
-          triangle.p2.y,
-          triangle.p2.z,
-          triangle.p2.w,
-          triangle.p2UV.u,
-          triangle.p2UV.v,  // vertex B
-          triangle.p3.x,
-          triangle.p3.y,
-          triangle.p3.z,
-          triangle.p3.w,
-          triangle.p3UV.u,
-          triangle.p3UV.v,  // vertex C
-          texture
-      );
-      //            Triangle(
-      //                triangle.p1.x,
-      //                triangle.p1.y,  // vertex A
-      //                triangle.p2.x,
-      //                triangle.p2.y,  // vertex B
-      //                triangle.p3.x,
-      //                triangle.p3.y,  // vertex C
-      //                Colors::Darken(Colors::GREEN,
-      //                triangle.lightIntensityFactor)
-      //            );
+      if (shouldRenderTexture) {
+        TexturedTriangle(
+            triangle.p1.x,
+            triangle.p1.y,
+            triangle.p1.z,
+            triangle.p1.w,
+            triangle.p1UV.u,
+            triangle.p1UV.v,  // vertex A
+            triangle.p2.x,
+            triangle.p2.y,
+            triangle.p2.z,
+            triangle.p2.w,
+            triangle.p2UV.u,
+            triangle.p2UV.v,  // vertex B
+            triangle.p3.x,
+            triangle.p3.y,
+            triangle.p3.z,
+            triangle.p3.w,
+            triangle.p3UV.u,
+            triangle.p3UV.v,  // vertex C
+            texture
+        );
+      }
+
+      if (shouldRenderWireframe) {
+        FilledTriangle(
+            triangle.p1.x,
+            triangle.p1.y,  // vertex A
+            triangle.p2.x,
+            triangle.p2.y,  // vertex B
+            triangle.p3.x,
+            triangle.p3.y,  // vertex C
+            Colors::Darken(Colors::GREEN, triangle.lightIntensityFactor)
+        );
+        Triangle(
+            triangle.p1.x,
+            triangle.p1.y,  // vertex A
+            triangle.p2.x,
+            triangle.p2.y,  // vertex B
+            triangle.p3.x,
+            triangle.p3.y,  // vertex C
+            Colors::Darken(Colors::BLACK, triangle.lightIntensityFactor)
+        );
+      }
     }
   }
 

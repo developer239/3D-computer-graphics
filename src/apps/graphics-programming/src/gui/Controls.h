@@ -9,11 +9,17 @@
 class Controls {
  public:
   void Render(
-      bool& shouldRotate, bool& shouldCull, Mesh& mesh
+      bool& shouldRotate,
+      bool& shouldCull,
+      Mesh& mesh,
+      bool& shouldRenderTexture,
+      bool& shouldRenderWireframe
   ) {
     if (ImGui::Begin("Controls")) {
       ImGui::Checkbox("Should rotate", &shouldRotate);
       ImGui::Checkbox("Should cull", &shouldCull);
+      ImGui::Checkbox("Show texture", &shouldRenderTexture);
+      ImGui::Checkbox("Show wireframe", &shouldRenderWireframe);
 
       ImGui::SliderFloat("Rotation X", &mesh.rotation.x, 0, 360);
       ImGui::SliderFloat("Rotation Y", &mesh.rotation.y, 0, 360);
