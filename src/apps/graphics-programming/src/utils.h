@@ -9,7 +9,7 @@ void intSwap(int *a, int *b) {
 
 // TODO: remove and replace with std:swap
 void floatSwap(float *a, float *b) {
-  int temp = *a;
+  float temp = *a;
   *a = *b;
   *b = temp;
 }
