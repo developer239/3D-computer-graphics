@@ -37,25 +37,25 @@ class WavefrontLoader {
   }
 
   void ProcessFaceLine(const std::string& line, Mesh& mesh) {
-    int vertex_indices[3];
-    int texture_indices[3];
-    int normal_indices[3];
+    int vertexIndices[3];
+    int textureIndices[3];
+    int normalIndices[3];
 
     sscanf(
         line.c_str(),
         "f %d/%d/%d %d/%d/%d %d/%d/%d",
-        &vertex_indices[0],
-        &texture_indices[0],
-        &normal_indices[0],
-        &vertex_indices[1],
-        &texture_indices[1],
-        &normal_indices[1],
-        &vertex_indices[2],
-        &texture_indices[2],
-        &normal_indices[2]
+        &vertexIndices[0],
+        &textureIndices[0],
+        &normalIndices[0],
+        &vertexIndices[1],
+        &textureIndices[1],
+        &normalIndices[1],
+        &vertexIndices[2],
+        &textureIndices[2],
+        &normalIndices[2]
     );
 
-    Face face(vertex_indices[0], vertex_indices[1], vertex_indices[2]);
+    Face face(vertexIndices[0], vertexIndices[1], vertexIndices[2]);
     mesh.faces.push_back(face);
   }
 };

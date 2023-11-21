@@ -50,7 +50,7 @@ class Painter {
     // current pixel
     float interpolatedU;
     float interpolatedV;
-    float interpolated_reciprocal_w;
+    float interpolatedReciprocalW;
 
     // Perform perspective correct interpolation of U/w, V/w values using the
     // barycentric weights and factor of 1/w
@@ -60,12 +60,12 @@ class Painter {
                     (cuv.u / pointC.w) * gamma;
     interpolatedV = (auv.v / pointA.w) * alpha + (buv.v / pointB.w) * beta +
                     (cuv.v / pointC.w) * gamma;
-    interpolated_reciprocal_w =
+    interpolatedReciprocalW =
         (1 / pointA.w) * alpha + (1 / pointB.w) * beta + (1 / pointC.w) * gamma;
 
     // Now we can divide back to both interpolated values by 1/w
-    interpolatedU /= interpolated_reciprocal_w;
-    interpolatedV /= interpolated_reciprocal_w;
+    interpolatedU /= interpolatedReciprocalW;
+    interpolatedV /= interpolatedReciprocalW;
 
     int textureX = abs((int)(interpolatedU * textureWidth));
     int textureY = abs((int)(interpolatedV * textureHeight));
@@ -97,10 +97,10 @@ class Painter {
   ) {
     for (int i = 0; i < width; i++) {
       for (int j = 0; j < height; j++) {
-        int current_x = x + i;
-        int current_y = y + j;
+        int currentX = x + i;
+        int currentY = y + j;
 
-        Pixel(current_x, current_y, color);
+        Pixel(currentX, currentY, color);
       }
     }
   }
@@ -297,82 +297,81 @@ class Painter {
 
         // order matters
         auto worldMatrix = mat4x4Translation * mat4x4Rotation * mat4x4Scale;
-        Vec<4> transformed_vertex4D = worldMatrix * vertex4D;
-        Vec<3> transformed_vertex = transformed_vertex4D.ToVec3();
+        Vec<4> transformedVertex4D = worldMatrix * vertex4D;
+        Vec<3> transformedVertex = transformedVertex4D.ToVec3();
 
         // Save transformed vertex in the array of transformed vertices
-        transformedVertices[j] = transformed_vertex;
+        transformedVertices[j] = transformedVertex;
       }
 
-      Vec<3> vector_a = transformedVertices[0]; /*   A   */
-      Vec<3> vector_b = transformedVertices[1]; /*  / \  */
-      Vec<3> vector_c = transformedVertices[2]; /* C---B */
+      Vec<3> vectorA = transformedVertices[0]; /*   A   */
+      Vec<3> vectorB = transformedVertices[1]; /*  / \  */
+      Vec<3> vectorC = transformedVertices[2]; /* C---B */
 
       // Get the vector subtraction of B-A and C-A
-      Vec<3> vector_ab = vector_b - vector_a;
-      Vec<3> vector_ac = vector_c - vector_a;
+      Vec<3> vectorAB = vectorB - vectorA;
+      Vec<3> vectorAC = vectorC - vectorA;
 
       // Compute the face normal (using cross product to find perpendicular)
-      Vec<3> normal = vector_ab.CrossProduct(vector_ac);
+      Vec<3> normal = vectorAB.CrossProduct(vectorAC);
 
       if (shouldCull) {
-        auto vector_a = transformedVertices[0];
         // Find the vector between a point in the triangle and the camera origin
-        Vec<3> camera_ray = camera.position - vector_a;
+        Vec<3> cameraRay = camera.position - vectorA;
 
-        float dot_normal_camera =
-            normal.Normalize().DotProduct(camera_ray.Normalize());
+        float dotNormalCamera =
+            normal.Normalize().DotProduct(cameraRay.Normalize());
 
         // Bypass the triangles that are looking away from the camera
-        if (dot_normal_camera < 0) {
+        if (dotNormalCamera < 0) {
           continue;
         }
       }
 
-      struct Triangle projected_triangle;
+      struct Triangle projectedTriangle;
 
       // Loop all three vertices to perform projection
       for (int j = 0; j < 3; j++) {
         // Project the current vertex
-        Vec<4> projected_point =
+        Vec<4> projectedPoint =
             camera.Project3DPointMatrix(transformedVertices[j]);
 
         // Scale into the view
-        projected_point.x *= (colorBuffer.windowWidth / 2);
-        projected_point.y *= (colorBuffer.windowHeight / 2);
+        projectedPoint.x *= (colorBuffer.windowWidth / 2);
+        projectedPoint.y *= (colorBuffer.windowHeight / 2);
 
         // invert Y axis to account for flipped screen coordinates
-        projected_point.y *= -1;
+        projectedPoint.y *= -1;
 
         // Scale and translate the projected points to the middle of the screen
-        projected_point.x += (colorBuffer.windowWidth / 2);
-        projected_point.y += (colorBuffer.windowHeight / 2);
-        projected_point.z = projected_point.z;
-        projected_point.w = projected_point.w;
+        projectedPoint.x += (colorBuffer.windowWidth / 2);
+        projectedPoint.y += (colorBuffer.windowHeight / 2);
+        projectedPoint.z = projectedPoint.z;
+        projectedPoint.w = projectedPoint.w;
 
         if (j == 0) {
-          projected_triangle.p1 = projected_point;
+          projectedTriangle.p1 = projectedPoint;
         } else if (j == 1) {
-          projected_triangle.p2 = projected_point;
+          projectedTriangle.p2 = projectedPoint;
         } else if (j == 2) {
-          projected_triangle.p3 = projected_point;
+          projectedTriangle.p3 = projectedPoint;
         }
       }
 
-      projected_triangle.averageDepth =
+      projectedTriangle.averageDepth =
           (transformedVertices[0].z + transformedVertices[1].z +
            transformedVertices[2].z) /
           3;
 
-      projected_triangle.lightIntensityFactor =
+      projectedTriangle.lightIntensityFactor =
           -normal.Normalize().DotProduct(light.direction);
 
-      projected_triangle.p1_uv = {meshFace.a_uv.u, meshFace.a_uv.v};
-      projected_triangle.p2_uv = {meshFace.b_uv.u, meshFace.b_uv.v};
-      projected_triangle.p3_uv = {meshFace.c_uv.u, meshFace.c_uv.v};
+      projectedTriangle.p1UV = {meshFace.aUV.u, meshFace.aUV.v};
+      projectedTriangle.p2UV = {meshFace.bUV.u, meshFace.bUV.v};
+      projectedTriangle.p3UV = {meshFace.cUV.u, meshFace.cUV.v};
 
       // Save the projected triangle in the array of triangles to render
-      trianglesToRender.push_back(projected_triangle);
+      trianglesToRender.push_back(projectedTriangle);
 
       // Painter algorithm - sort the triangles by average depth
       std::sort(
@@ -401,20 +400,20 @@ class Painter {
           triangle.p1.y,
           triangle.p1.z,
           triangle.p1.w,
-          triangle.p1_uv.u,
-          triangle.p1_uv.v,  // vertex A
+          triangle.p1UV.u,
+          triangle.p1UV.v,  // vertex A
           triangle.p2.x,
           triangle.p2.y,
           triangle.p2.z,
           triangle.p2.w,
-          triangle.p2_uv.u,
-          triangle.p2_uv.v,  // vertex B
+          triangle.p2UV.u,
+          triangle.p2UV.v,  // vertex B
           triangle.p3.x,
           triangle.p3.y,
           triangle.p3.z,
           triangle.p3.w,
-          triangle.p3_uv.u,
-          triangle.p3_uv.v,  // vertex C
+          triangle.p3UV.u,
+          triangle.p3UV.v,  // vertex C
           texture
       );
       //            Triangle(
@@ -450,15 +449,15 @@ class Painter {
     Vec<2> ap = p - a;
 
     // Area of the full parallelogram (triangle ABC) using cross product
-    float area_abc = ac.x * ab.y - ac.y * ab.x;  // |AC x AB|
+    float areaABC = ac.x * ab.y - ac.y * ab.x;  // |AC x AB|
 
     // Alpha = area of parallelogram- PBC over the area of the full
     // parallelogram-ABC
-    float alpha = (pc.x * pb.y - pc.y * pb.x) / area_abc;
+    float alpha = (pc.x * pb.y - pc.y * pb.x) / areaABC;
 
     // Beta = area of parallelogram-APC over the area of the full
     // parallelogram-ABC
-    float beta = (ac.x * ap.y - ac.y * ap.x) / area_abc;
+    float beta = (ac.x * ap.y - ac.y * ap.x) / areaABC;
 
     // Gama can be easily found since the barycentric coordinates always add up
     // to 1.0
@@ -471,18 +470,18 @@ class Painter {
       int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color
   ) {
     // Find the two slopes (two triangle legs)
-    float inv_slope_1 = (float)(x1 - x0) / (y1 - y0);
-    float inv_slope_2 = (float)(x2 - x0) / (y2 - y0);
+    float invSlope1 = (float)(x1 - x0) / (y1 - y0);
+    float invSlope2 = (float)(x2 - x0) / (y2 - y0);
 
-    // Start x_start and x_end from the top vertex (x0,y0)
-    float x_start = x0;
-    float x_end = x0;
+    // Start xStart and xEnd from the top vertex (x0,y0)
+    float xStart = x0;
+    float xEnd = x0;
 
     // Loop all the scanlines from top to bottom
     for (int y = y0; y <= y2; y++) {
-      Line(x_start, y, x_end, y, color);
-      x_start += inv_slope_1;
-      x_end += inv_slope_2;
+      Line(xStart, y, xEnd, y, color);
+      xStart += invSlope1;
+      xEnd += invSlope2;
     }
   }
 
@@ -490,18 +489,18 @@ class Painter {
       int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color
   ) {
     // Find the two slopes (two triangle legs)
-    float inv_slope_1 = (float)(x2 - x0) / (y2 - y0);
-    float inv_slope_2 = (float)(x2 - x1) / (y2 - y1);
+    float invSlope1 = (float)(x2 - x0) / (y2 - y0);
+    float invSlope2 = (float)(x2 - x1) / (y2 - y1);
 
-    // Start x_start and x_end from the bottom vertex (x2,y2)
-    float x_start = x2;
-    float x_end = x2;
+    // Start xStart and xEnd from the bottom vertex (x2,y2)
+    float xStart = x2;
+    float xEnd = x2;
 
     // Loop all the scanlines from bottom to top
     for (int y = y2; y >= y0; y--) {
-      Line(x_start, y, x_end, y, color);
-      x_start -= inv_slope_1;
-      x_end -= inv_slope_2;
+      Line(xStart, y, xEnd, y, color);
+      xStart -= invSlope1;
+      xEnd -= invSlope2;
     }
   }
 };

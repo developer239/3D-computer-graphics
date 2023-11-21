@@ -10,9 +10,9 @@ struct Triangle {
   Vec<4> p3;
 
   // TODO: this seems to be duplicated? Why have it both here and in p1, p2, p3?
-  UVCoordinates p1_uv;
-  UVCoordinates p2_uv;
-  UVCoordinates p3_uv;
+  UVCoordinates p1UV;
+  UVCoordinates p2UV;
+  UVCoordinates p3UV;
 
   double averageDepth;
   double lightIntensityFactor;
