@@ -13,3 +13,6 @@
 [submodule "externals/ImGuiFileDialog"]
 	path = externals/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog.git
+[submodule "externals/upng"]
+	path = externals/upng
+	url = https://github.com/elanthis/upng.git

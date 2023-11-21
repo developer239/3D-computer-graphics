@@ -6,12 +6,14 @@
 #include <memory>
 #include <vector>
 #include "../Colors.h"
+#include "../LoopStrategy.h"
 #include "../geometry/Mesh.h"
 #include "../math/Matrix4x4.h"
 #include "../math/Triangle.h"
 #include "Camera.h"
 #include "ColorBuffer.h"
 #include "Light.h"
+#include "Texture.h"
 
 class Painter {
  public:
@@ -32,8 +34,7 @@ class Painter {
       int x, int y,                                             //
       Vec<4> pointA, Vec<4> pointB, Vec<4> pointC,              //
       UVCoordinates auv, UVCoordinates buv, UVCoordinates cuv,  //
-      const std::unique_ptr<uint32_t[]>& texture,               //
-      int textureWidth = 64, int textureHeight = 64
+      const Texture& texture
   ) {
     auto pointP = Vec<2>{(float)x, (float)y};
     Vec<2> a = pointA.ToVec2();
@@ -66,10 +67,10 @@ class Painter {
     interpolatedU /= interpolatedReciprocalW;
     interpolatedV /= interpolatedReciprocalW;
 
-    int textureX = abs((int)(interpolatedU * textureWidth));
-    int textureY = abs((int)(interpolatedV * textureHeight));
+    int textureX = abs((int)(interpolatedU * texture.width));
+    int textureY = abs((int)(interpolatedV * texture.height));
 
-    Pixel(x, y, texture[textureY * textureWidth + textureX]);
+    Pixel(x, y, texture.data[textureY * texture.width + textureX]);
   }
 
   void Line(int x0, int y0, int x1, int y1, uint32_t color = Colors::MAGENTA) {
@@ -152,7 +153,7 @@ class Painter {
   // original triangle in two, half flat-bottom and half-flat top
   //
   //            v0 (x0, y0)
-  //                                                   / \
+  //                                                      / \
   //           /   \
   //          /     \
   //         /       \
@@ -172,7 +173,7 @@ class Painter {
       int x0, int y0, float z0, float w0, float u0, float v0,  //
       int x1, int y1, float z1, float w1, float u1, float v1,  //
       int x2, int y2, float z2, float w2, float u2, float v2,  //
-      const std::unique_ptr<uint32_t[]>& texture
+      const Texture& texture
   ) {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
     if (y0 > y1) {
@@ -266,7 +267,7 @@ class Painter {
   void Mesh(
       Mesh mesh, bool shouldCull, bool shouldRenderTexture,
       bool shouldRenderWireframe, Camera camera, Light light,
-      const std::unique_ptr<uint32_t[]>& texture
+      const Texture& texture
   ) {
     std::vector<struct Triangle> trianglesToRender;
 
