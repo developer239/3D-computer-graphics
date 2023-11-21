@@ -23,7 +23,7 @@ class ColorBuffer {
       colorBufferTexture = std::unique_ptr<SDL_Texture, void (*)(SDL_Texture*)>(
           SDL_CreateTexture(
               renderer.Get().get(),
-              SDL_PIXELFORMAT_ARGB8888,
+              SDL_PIXELFORMAT_RGBA32,
               SDL_TEXTUREACCESS_STREAMING,
               windowWidth,
               windowHeight
