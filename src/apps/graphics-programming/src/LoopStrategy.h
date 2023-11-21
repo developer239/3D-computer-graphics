@@ -23,13 +23,12 @@ class LoopStrategy : public Core::IStrategy {
 
   bool shouldRotate = false;
   bool shouldCull = true;
-  bool shouldRenderTexture = false;
-  bool shouldRenderWireframe = true;
+  bool shouldRenderTexture = true;
+  bool shouldRenderWireframe = false;
 
   void Init(Core::Window& window, Core::Renderer& renderer) override {
-    wavefrontLoader.LoadObjFile("assets/models/cube.obj", mesh);
-    // mesh = Mesh::CreateCube();
-    texture = Texture("assets/textures/cube.png");
+    wavefrontLoader.LoadObjFile("assets/models/f22.obj", mesh);
+    texture = Texture("assets/models/f22.png");
   }
 
   void HandleEvent(SDL_Event& event) override {}

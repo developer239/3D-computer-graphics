@@ -67,8 +67,13 @@ class Painter {
     interpolatedU /= interpolatedReciprocalW;
     interpolatedV /= interpolatedReciprocalW;
 
-    int textureX = abs((int)(interpolatedU * texture.width));
-    int textureY = abs((int)(interpolatedV * texture.height));
+    int textureX = abs((int)(interpolatedU * texture.width))
+                   // hacky way to fix overflow:
+                   // should not be > texture.width and < 0
+                   // so we use modulo to wrap around the texture if needed
+                   // if >1 then we take the next decimal part
+                   % texture.width;
+    int textureY = abs((int)(interpolatedV * texture.height)) % texture.height;
 
     Pixel(x, y, texture.data[textureY * texture.width + textureX]);
   }
@@ -153,7 +158,7 @@ class Painter {
   // original triangle in two, half flat-bottom and half-flat top
   //
   //            v0 (x0, y0)
-  //                                                      / \
+  //                                                       / \
   //           /   \
   //          /     \
   //         /       \
@@ -201,7 +206,8 @@ class Painter {
       std::swap(v0, v1);
     }
 
-    // Flip the V component to account for inverted UV-coordinates (V grows downwards)
+    // Flip the V component to account for inverted UV-coordinates (V grows
+    // downwards)
     v0 = 1 - v0;
     v1 = 1 - v1;
     v2 = 1 - v2;
