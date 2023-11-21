@@ -30,19 +30,42 @@ class Painter {
 
   // Draw textured pixel at position x and y using interpolation
   void Texel(
-      int x, int y, Vec<2> pointA, Vec<2> pointB, Vec<2> pointC,
-      UVCoordinates uv0, UVCoordinates uv1, UVCoordinates uv2,
-      const std::unique_ptr<uint32_t[]>& texture, int textureWidth = 64, int textureHeight = 64
+      int x, int y, Vec<4> pointA, Vec<4> pointB, Vec<4> pointC,
+      UVCoordinates auv, UVCoordinates buv, UVCoordinates cuv,
+      const std::unique_ptr<uint32_t[]>& texture, int textureWidth = 64,
+      int textureHeight = 64
   ) {
     auto pointP = Vec<2>{(float)x, (float)y};
-    auto weights = BarycentricWeights(pointA, pointB, pointC, pointP);
+    Vec<2> a = pointA.ToVec2();
+    Vec<2> b = pointB.ToVec2();
+    Vec<2> c = pointC.ToVec2();
+
+    auto weights = BarycentricWeights(a, b, c, pointP);
 
     float alpha = weights.x;
     float beta = weights.y;
     float gamma = weights.z;
 
-    auto interpolatedU = uv0.u * alpha + uv1.u * beta + uv2.u * gamma;
-    auto interpolatedV = uv0.v * alpha + uv1.v * beta + uv2.v * gamma;
+    // Variables to store the interpolated values of U, V, and also 1/w for the
+    // current pixel
+    float interpolatedU;
+    float interpolatedV;
+    float interpolated_reciprocal_w;
+
+    // Perform perspective correct interpolation of U/w, V/w values using the
+    // barycentric weights and factor of 1/w
+
+
+    interpolatedU = (auv.u / pointA.w) * alpha + (buv.u / pointB.w) * beta +
+                    (cuv.u / pointC.w) * gamma;
+    interpolatedV = (auv.v / pointA.w) * alpha + (buv.v / pointB.w) * beta +
+                    (cuv.v / pointC.w) * gamma;
+    interpolated_reciprocal_w =
+        (1 / pointA.w) * alpha + (1 / pointB.w) * beta + (1 / pointC.w) * gamma;
+
+    // Now we can divide back to both interpolated values by 1/w
+    interpolatedU /= interpolated_reciprocal_w;
+    interpolatedV /= interpolated_reciprocal_w;
 
     int textureX = abs((int)(interpolatedU * textureWidth));
     int textureY = abs((int)(interpolatedV * textureHeight));
@@ -130,7 +153,7 @@ class Painter {
   // original triangle in two, half flat-bottom and half-flat top
   //
   //            v0 (x0, y0)
-  //                                   / \
+  //                                           / \
   //           /   \
   //          /     \
   //         /       \
@@ -147,32 +170,40 @@ class Painter {
   //                           v2
   //
   void TexturedTriangle(
-      int x0, int y0, int x1, int y1, int x2, int y2, float u0, float v0,
-      float u1, float v1, float u2, float v2, const std::unique_ptr<uint32_t[]>& texture
+      int x0, int y0, float z0, float w0, float u0, float v0,
+      int x1, int y1, float z1, float w1, float u1, float v1,
+      int x2, int y2, float z2, float w2, float u2, float v2,
+      const std::unique_ptr<uint32_t[]>& texture
   ) {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
     if (y0 > y1) {
       intSwap(&y0, &y1);
       intSwap(&x0, &x1);
+      floatSwap(&z0, &z1);
+      floatSwap(&w0, &w1);
       floatSwap(&u0, &u1);
       floatSwap(&v0, &v1);
     }
     if (y1 > y2) {
       intSwap(&y1, &y2);
       intSwap(&x1, &x2);
+      floatSwap(&z1, &z2);
+      floatSwap(&w1, &w2);
       floatSwap(&u1, &u2);
       floatSwap(&v1, &v2);
     }
     if (y0 > y1) {
       intSwap(&y0, &y1);
       intSwap(&x0, &x1);
+      floatSwap(&z0, &z1);
+      floatSwap(&w0, &w1);
       floatSwap(&u0, &u1);
       floatSwap(&v0, &v1);
     }
 
-    Vec<2> pointA = {(float)x0, (float)y0};
-    Vec<2> pointB = {(float)x1, (float)y1};
-    Vec<2> pointC = {(float)x2, (float)y2};
+    auto pointA = Vec<4>{(float)x0, (float)y0, z0, w0};
+    auto pointB = Vec<4>{(float)x1, (float)y1, z1, w1};
+    auto pointC = Vec<4>{(float)x2, (float)y2, z2, w2};
 
     UVCoordinates uvA = {u0, v0};
     UVCoordinates uvB = {u1, v1};
@@ -316,6 +347,8 @@ class Painter {
         // Scale and translate the projected points to the middle of the screen
         projected_point.x += (colorBuffer.windowWidth / 2);
         projected_point.y += (colorBuffer.windowHeight / 2);
+        projected_point.z = projected_point.z;
+        projected_point.w = projected_point.w;
 
         if (j == 0) {
           projected_triangle.p1 = projected_point;
@@ -365,17 +398,23 @@ class Painter {
       //            );
       TexturedTriangle(
           triangle.p1.x,
-          triangle.p1.y,  // vertex A
-          triangle.p2.x,
-          triangle.p2.y,  // vertex B
-          triangle.p3.x,
-          triangle.p3.y,  // vertex C
+          triangle.p1.y,
+          triangle.p1.z,
+          triangle.p1.w,
           triangle.p1_uv.u,
-          triangle.p1_uv.v,
+          triangle.p1_uv.v,  // vertex A
+          triangle.p2.x,
+          triangle.p2.y,
+          triangle.p2.z,
+          triangle.p2.w,
           triangle.p2_uv.u,
-          triangle.p2_uv.v,
+          triangle.p2_uv.v,  // vertex B
+          triangle.p3.x,
+          triangle.p3.y,
+          triangle.p3.z,
+          triangle.p3.w,
           triangle.p3_uv.u,
-          triangle.p3_uv.v,
+          triangle.p3_uv.v,  // vertex C
           texture
       );
       //            Triangle(

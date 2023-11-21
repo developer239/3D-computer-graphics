@@ -164,4 +164,6 @@ class Vec<4> {
   explicit Vec(Vec<3> v, float w = 1) : x(v.x), y(v.y), z(v.z), w(w) {}
 
   Vec<3> ToVec3() const { return Vec<3>(x, y, z); }
+
+  Vec<2> ToVec2() const { return Vec<2>(x, y); }
 };
