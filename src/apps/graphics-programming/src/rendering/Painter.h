@@ -9,7 +9,6 @@
 #include "../geometry/Mesh.h"
 #include "../math/Matrix4x4.h"
 #include "../math/Triangle.h"
-#include "../utils.h"
 #include "Camera.h"
 #include "ColorBuffer.h"
 #include "Light.h"
@@ -118,16 +117,16 @@ class Painter {
   ) {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
     if (y0 > y1) {
-      intSwap(&y0, &y1);
-      intSwap(&x0, &x1);
+      std::swap(y0, y1);
+      std::swap(x0, x1);
     }
     if (y1 > y2) {
-      intSwap(&y1, &y2);
-      intSwap(&x1, &x2);
+      std::swap(y1, y2);
+      std::swap(x1, x2);
     }
     if (y0 > y1) {
-      intSwap(&y0, &y1);
-      intSwap(&x0, &x1);
+      std::swap(y0, y1);
+      std::swap(x0, x1);
     }
 
     if (y1 == y2) {
@@ -177,28 +176,28 @@ class Painter {
   ) {
     // We need to sort the vertices by y-coordinate ascending (y0 < y1 < y2)
     if (y0 > y1) {
-      intSwap(&y0, &y1);
-      intSwap(&x0, &x1);
-      floatSwap(&z0, &z1);
-      floatSwap(&w0, &w1);
-      floatSwap(&u0, &u1);
-      floatSwap(&v0, &v1);
+      std::swap(y0, y1);
+      std::swap(x0, x1);
+      std::swap(z0, z1);
+      std::swap(w0, w1);
+      std::swap(u0, u1);
+      std::swap(v0, v1);
     }
     if (y1 > y2) {
-      intSwap(&y1, &y2);
-      intSwap(&x1, &x2);
-      floatSwap(&z1, &z2);
-      floatSwap(&w1, &w2);
-      floatSwap(&u1, &u2);
-      floatSwap(&v1, &v2);
+      std::swap(y1, y2);
+      std::swap(x1, x2);
+      std::swap(z1, z2);
+      std::swap(w1, w2);
+      std::swap(u1, u2);
+      std::swap(v1, v2);
     }
     if (y0 > y1) {
-      intSwap(&y0, &y1);
-      intSwap(&x0, &x1);
-      floatSwap(&z0, &z1);
-      floatSwap(&w0, &w1);
-      floatSwap(&u0, &u1);
-      floatSwap(&v0, &v1);
+      std::swap(y0, y1);
+      std::swap(x0, x1);
+      std::swap(z0, z1);
+      std::swap(w0, w1);
+      std::swap(u0, u1);
+      std::swap(v0, v1);
     }
 
     auto pointA = Vec<4>{(float)x0, (float)y0, z0, w0};
@@ -227,7 +226,7 @@ class Painter {
         int xEnd = x0 + (y - y0) * invSlope2;
 
         if (xEnd < xStart) {
-          intSwap(&xStart, &xEnd);
+          std::swap(xStart, xEnd);
         }
 
         for (int x = xStart; x < xEnd; x++) {
@@ -254,7 +253,7 @@ class Painter {
         int xEnd = x0 + (y - y0) * invSlope2;
 
         if (xEnd < xStart) {
-          intSwap(&xStart, &xEnd);
+          std::swap(xStart, xEnd);
         }
 
         for (int x = xStart; x < xEnd; x++) {
